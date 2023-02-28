@@ -1,8 +1,11 @@
-package com.juse.emulator.ui;
+package com.example.gui;
 
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -18,7 +21,8 @@ import com.juse.emulator.interfaces.ui.EmulatorDisplay;
 import com.juse.emulator.interfaces.ui.EmulatorFrame;
 
 
-public class EmulatorFrameImpl extends JFrame implements EmulatorFrame, ActionListener
+
+public class ExGUIFrameImpl extends JFrame implements EmulatorFrame, ActionListener
 {
 	public String versionString = "1.0";
 
@@ -31,7 +35,7 @@ public class EmulatorFrameImpl extends JFrame implements EmulatorFrame, ActionLi
 
 	private EmulatorDisplay emulatorDisplay;
 
-	public EmulatorFrameImpl(String title, int initialX, int initialY, int initialWidth, int initialHeight)
+	public ExGUIFrameImpl(String title, int initialX, int initialY, int initialWidth, int initialHeight)
 	{
 		platform = System.getProperty("os.name").toLowerCase();
 		// Global Stuff:
@@ -70,7 +74,7 @@ public class EmulatorFrameImpl extends JFrame implements EmulatorFrame, ActionLi
 		//
 		try
 		{
-			EmulatorDisplay ed = new EmulatorDisplayImpl(emu);
+			EmulatorDisplay ed = new ExGUIDisplayImpl(emu);
 			if(ed!=null)
 			{
 				//
@@ -97,7 +101,7 @@ public class EmulatorFrameImpl extends JFrame implements EmulatorFrame, ActionLi
 		this.setContentPane(jp);
 		//
 		//this.setUndecorated(false);
-		this.setTitle("System Emulator");		
+		this.setTitle("Green System Emulator");		
 		//this.setSize(new Dimension(1920,1080));
 		this.setVisible(true);
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -120,13 +124,13 @@ public class EmulatorFrameImpl extends JFrame implements EmulatorFrame, ActionLi
 		// test layouts
 		//
 		
-		EmulatorFrame ef1 = new EmulatorFrameImpl("New Window 1", -1, -1, 800, 600);
+		EmulatorFrame ef1 = new ExGUIFrameImpl("New Window 1", -1, -1, 800, 600);
 		ef1.showFrame(true);
 
-		EmulatorFrame ef2 = new EmulatorFrameImpl("New Window 2", x+=100, y+=100, 800, 600);
+		EmulatorFrame ef2 = new ExGUIFrameImpl("New Window 2", x+=100, y+=100, 800, 600);
 		ef2.showFrame(true);
 
-		EmulatorFrame ef3 = new EmulatorFrameImpl("New Window 3", x+=100, y+=100, 800, 600);
+		EmulatorFrame ef3 = new ExGUIFrameImpl("New Window 3", x+=100, y+=100, 800, 600);
 		ef3.showFrame(true);
 	}
 
