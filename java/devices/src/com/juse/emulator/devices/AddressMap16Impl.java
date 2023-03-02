@@ -33,6 +33,11 @@ public class AddressMap16Impl implements BusEx, AddressMap
 
 	private List<BusListener> busListeners = new Vector<BusListener>();
 
+	static protected int asAddress(int addressUknown)
+	{
+		return (0xFFFFFFFF & addressUknown);
+	}
+	
 	public AddressMap16Impl()
 	{
 	}	
@@ -192,7 +197,7 @@ public class AddressMap16Impl implements BusEx, AddressMap
 	{
 		for(Integer adr : this.mappedAddressSpace.keySet())
 		{
-			String hex = Integer.toHexString(adr).toUpperCase();
+			String hex = Long.toHexString(adr).toUpperCase();
 			
 			int hlen = hex.length();
 			int nlen = (8 - hlen);
@@ -319,6 +324,25 @@ public class AddressMap16Impl implements BusEx, AddressMap
 	@SuppressWarnings("unused")
 	public static void main(String[] args)
 	{
+		String addr1 = "FFFFFFFF";
+		int intVal = (int)Long.parseLong(addr1, 16);
+		System.out.println("intVal:" + intVal);
+		System.out.println("intVal:" + Integer.toHexString(intVal));
+		
+		intVal = 0xffffffff;
+		System.out.println("intVal:" + intVal);
+		System.out.println("intVal:" + Integer.toHexString(intVal));		
+		
+		System.out.println((long)intVal);
+		System.out.println(Long.toHexString(intVal & 0xFFFFFFFF));
+		
+		String addr2 = "-1";
+		System.out.println(Integer.toHexString(Integer.parseInt(addr2, 10)));
+		
+		
+		System.out.println(AddressMap16Impl.asAddress(0));
+		
+		
 		System.out.println(AddressMap.toHexAddress(15, IOSize.IO8Bit));
 		System.out.println(AddressMap.toHexAddress(15, IOSize.IO16Bit));
 		System.out.println(AddressMap.toHexAddress(15, IOSize.IO32Bit));
