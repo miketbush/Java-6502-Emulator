@@ -10,6 +10,8 @@ import com.juse.emulator.interfaces.RAMEx;
 
 public class RAM32Device implements BusDevice, RAMEx
 {
+	private static final int PAGE_SIZE = 0x0000FFFF;
+	
 	private byte[][] banks;
 	private BusAddressRange bar;
 
@@ -17,15 +19,17 @@ public class RAM32Device implements BusDevice, RAMEx
 	{
 		byte[][] banks;
 		
-		System.out.println("RAM32Device::createBanks:" + Long.toHexString(allocationSize));
+		System.out.println("RAM32Device::" + Long.toHexString(allocationSize));
+		
+		//System.out.println("RAM32Device::" + Long.toHexString(allocationSize));
 
 		int high = (int)((allocationSize & 0xFFFF0000L) >> 16);
-		System.out.println("createBanks high:" + high);
+		//System.out.println("createBanks high:" + high);
 		
-		banks = new byte[(int)high][0x0000FFFF + 1];
+		banks = new byte[(int)high][PAGE_SIZE + 1];
 		
-		System.out.println("\tbanks high:" + high + " (" + Integer.toHexString(high) + ")");
-		System.out.println("\tbanks low :" + 0x0000FFFF  + " (" + Integer.toHexString(0x0000FFFF) + ")");		
+		//System.out.println("\tbanks high:" + high + " (" + Integer.toHexString(high) + ")");
+		//System.out.println("\tbanks low :" + PAGE_SIZE  + " (" + Integer.toHexString(PAGE_SIZE) + ")");		
 		
 		return banks;
 	}	
@@ -35,36 +39,44 @@ public class RAM32Device implements BusDevice, RAMEx
 	{
 		int value = 0;
 		
-		int high = (int)((address & 0xFFFF0000L) >> 16);
-		int low  = (int)((address & 0x0000FFFFL));
-		
-		if(IOSize.IO8Bit == size)
+		try
 		{
-			value = (int)(banks[high][low] & 0xFF);
+			int high = (int)((address & 0xFFFF0000L) >> 16);
+			int low  = (int)((address & 0x0000FFFFL));
+			
+			if(IOSize.IO8Bit == size)
+			{
+				value = (int)(banks[high][low] & 0xFF);
+			}
+			else if(IOSize.IO16Bit == size)
+			{
+				value  = (int)((banks[high][low] & 0xFF));
+				value |= (int)((banks[high][low+1] & 0xFF) << 8);
+			}
+			else if(IOSize.IOBig16Bit == size)
+			{
+				value = (int)((banks[high][low+1] & 0xFF));
+				value |= (int)((banks[high][low] & 0xFF) << 8);
+			}		
+			else if(IOSize.IO32Bit == size)
+			{
+				value =  (int)((banks[high][low]   & 0xFF));
+				value |= (int)((banks[high][low+1] & 0xFF) << 8);
+				value |= (int)((banks[high][low+2] & 0xFF) << 16);
+				value |= (int)((banks[high][low+3] & 0xFF) << 24);   
+			}
+			else if(IOSize.IOBig32Bit == size)
+			{
+				value  = (int)((banks[high][low]   & 0xFF) << 24);
+				value |= (int)((banks[high][low+1] & 0xFF) << 16);
+				value |= (int)((banks[high][low+2] & 0xFF) << 8);
+				value |= (int)((banks[high][low+3] & 0xFF));
+			}
 		}
-		else if(IOSize.IO16Bit == size)
+		catch (Exception e)
 		{
-			value  = (int)((banks[high][low] & 0xFF));
-			value |= (int)((banks[high][low+1] & 0xFF) << 8);
-		}
-		else if(IOSize.IOBig16Bit == size)
-		{
-			value = (int)((banks[high][low+1] & 0xFF));
-			value |= (int)((banks[high][low] & 0xFF) << 8);
-		}		
-		else if(IOSize.IO32Bit == size)
-		{
-			value =  (int)((banks[high][low]   & 0xFF));
-			value |= (int)((banks[high][low+1] & 0xFF) << 8);
-			value |= (int)((banks[high][low+2] & 0xFF) << 16);
-			value |= (int)((banks[high][low+3] & 0xFF) << 24);   
-		}
-		else if(IOSize.IOBig32Bit == size)
-		{
-			value  = (int)((banks[high][low]   & 0xFF) << 24);
-			value |= (int)((banks[high][low+1] & 0xFF) << 16);
-			value |= (int)((banks[high][low+2] & 0xFF) << 8);
-			value |= (int)((banks[high][low+3] & 0xFF));
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}						
 		
 		return value;		

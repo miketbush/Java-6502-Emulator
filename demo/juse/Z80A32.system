@@ -11,25 +11,25 @@ name=Z80A
 ####################################################
 #            Extension Class Path
 ####################################################
-ext=./ext
+#ext=./ext
 
 ####################################################
 #            User Interface Handler Class
 ####################################################
-ui=com.mygui.EmulatorFrameImpl
+#ui=com.mygui.EmulatorFrameImpl
 
 ####################################################
 #            Address Map Handler Class
 ####################################################
 
-addressbus=com.juse.emulator.devices.AddressMapImpl
+addressbus=com.juse.emulator.devices.AddressMap16Impl
 
 ####################################################
 #             CPU Definition Class
 ####################################################
 
-cpu=com.juse.emulator.ext.cpu.Zilog.Z80A
-#cpu=com.juse.emulator.devices.cpu.Zilog.Z80
+#cpu=com.juse.emulator.ext.cpu.Zilog.Z80A
+cpu=com.juse.emulator.devices.cpu.Zilog.Z80
 
 ####################################################
 #         Device Handler Classes and Namings

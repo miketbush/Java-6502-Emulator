@@ -1,6 +1,6 @@
 package com.juse.emulator.interfaces;
 public interface BusExListener extends BusListener
 {
-	void readListener(long address, IOSize size); 	
-	void writeListener(long address, long data, IOSize size);
+	void readListener(int address, IOSize size); 	
+	void writeListener(int address, int data, IOSize size);
 }

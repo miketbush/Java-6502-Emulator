@@ -15,6 +15,7 @@ import com.juse.emulator.interfaces.BusAccessor;
 import com.juse.emulator.interfaces.BusAddressRange;
 import com.juse.emulator.interfaces.BusDevice;
 import com.juse.emulator.interfaces.BusEx;
+import com.juse.emulator.interfaces.BusExListener;
 import com.juse.emulator.interfaces.BusIRQ;
 import com.juse.emulator.interfaces.BusListener;
 import com.juse.emulator.interfaces.BusReader;
@@ -126,47 +127,18 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		return bd;
 	}
 
-	
-
-
 
 	@Override
 	public byte read(short address)
 	{
-		int laddr = address;
-		
-		if(address < 0)
-		{
-			laddr = 0xFFFF + address + 1;
-			//System.out.println(Integer.toHexString(laddr));
-		}
-		byte v =  (byte) getMemoryMappedDevice(laddr).readAddressUnsigned(laddr, IOSize.IO8Bit);
-		
-		if(busListeners!=null && busListeners.size() > 0)
-			for(BusListener b : busListeners)
-				b.readListener(address);
-		
-		return v;
+		return (byte)(read((address), IOSize.IO8Bit) & 0xFF);
 	}
 
 
 	@Override
 	public void write(short address, byte data)
 	{
-		int laddr = address;
-		
-		
-		if(address < 0)
-		{
-			laddr = 0xFFFF + address + 1;
-			//System.out.println(Integer.toHexString(laddr));
-		}		
-		
-		getMemoryMappedDevice(laddr).writeAddress(laddr, data,IOSize.IO8Bit);		
-
-		if(busListeners!=null && busListeners.size() > 0)
-			for(BusListener b : busListeners)
-				b.writeListener(address, data);
+		write(((int)address & 0xFFFF), (int)data, IOSize.IO8Bit);
 	}
 
 	@Override
@@ -174,24 +146,38 @@ public class AddressMap16Impl implements BusEx, AddressMap
 	{
 		int laddr = address;
 		
-		if(address < 0)
+
+		int v = getMemoryMappedDevice(laddr).readAddressUnsigned(laddr, size);
+		
+		if(busListeners!=null && busListeners.size() > 0)
 		{
-			laddr = 0xFFFF + address + 1;
-			//System.out.println(Integer.toHexString(laddr));
+			for(BusListener b : busListeners)
+			{
+				if(b instanceof BusExListener)
+					((BusExListener)b).readListener(address,size);
+				else
+					b.readListener((short)address);
+			}
 		}
-		byte v =  (byte) getMemoryMappedDevice(laddr).readAddressUnsigned(laddr, IOSize.IO8Bit);
-		
-		//if(busListeners!=null && busListeners.size() > 0)
-		//	for(BusListener b : busListeners)
-		//		b.readListener(address, IOSize.IO8Bit);
-		
 		return v;
 	}
 
 	@Override
 	public void write(int address, int data, IOSize size)
 	{
-		// TODO Auto-generated method stub		
+		int laddr = address;
+				
+		BusDevice bd = getMemoryMappedDevice(laddr);
+		bd.writeAddress(laddr, data,size);		
+
+		if(busListeners!=null && busListeners.size() > 0)
+			for(BusListener b : busListeners)
+			{
+				if(b instanceof BusExListener)
+					((BusExListener)b).writeListener(address, data, size);
+				else
+					b.writeListener((short)address, (byte)data);
+			}
 	}	
 	
 	public void printAddressMap()
@@ -237,7 +223,8 @@ public class AddressMap16Impl implements BusEx, AddressMap
 			
 			for(int bk = bar.getLowAddress(); bk <= bar.getHighAddress(); bk++)
 			{
-				String hex = Integer.toHexString(this.read((short)bk) & 0xFF).toUpperCase();
+				//String hex = Integer.toHexString(this.read((short)bk) & 0xFF).toUpperCase();
+				String hex = Integer.toHexString(this.read(bk, IOSize.IO8Bit) & 0xFF).toUpperCase();
 				
 				int hlen = hex.length();
 				int nlen = (2 - hlen);
