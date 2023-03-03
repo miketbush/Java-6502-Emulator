@@ -6,8 +6,9 @@ import com.juse.emulator.interfaces.BusAddressRange;
 import com.juse.emulator.interfaces.BusDevice;
 import com.juse.emulator.interfaces.IOSize;
 import com.juse.emulator.interfaces.RAM;
+import com.juse.emulator.interfaces.RAMEx;
 
-public class RAM32Device implements BusDevice, RAM
+public class RAM32Device implements BusDevice, RAMEx
 {
 	private byte[][] banks;
 	private BusAddressRange bar;
@@ -15,7 +16,6 @@ public class RAM32Device implements BusDevice, RAM
 	protected byte[][] createBanks(long allocationSize)
 	{
 		byte[][] banks;
-		long bankCount = 0;
 		
 		System.out.println("RAM32Device::createBanks:" + Long.toHexString(allocationSize));
 
@@ -30,20 +30,8 @@ public class RAM32Device implements BusDevice, RAM
 		return banks;
 	}	
 	
-	protected byte readBank(int address, IOSize size)
-	{
-		int high = (int)((address & 0xFFFF0000L) >> 16);
-		int low = (int)((address & 0x0000FFFFL));
-		
-		System.out.println("readBank linear address:" + Long.toHexString(address));
-		System.out.println("\thigh:" + high + " (" + Integer.toHexString(high) + ")");
-		System.out.println("\tlow :" + low  + " (" + Integer.toHexString(low) + ")");
-		
-		
-		return banks[high][low];		
-	}
-
-	protected int readBankValue(int address, IOSize size)
+	@Override
+	public int readValue(int address, IOSize size)
 	{
 		int value = 0;
 		
@@ -52,7 +40,7 @@ public class RAM32Device implements BusDevice, RAM
 		
 		if(IOSize.IO8Bit == size)
 		{
-			value = (byte)(banks[high][low] & 0xFF);
+			value = (int)(banks[high][low] & 0xFF);
 		}
 		else if(IOSize.IO16Bit == size)
 		{
@@ -82,8 +70,8 @@ public class RAM32Device implements BusDevice, RAM
 		return value;		
 	}	
 
-	
-	public  void writeBank(int address, int value, IOSize size)
+	@Override
+	public void writeValue(int address, int value, IOSize size)	
 	{
 		int high = (int)((address & 0xFFFF0000L) >> 16);
 		int low = (int)((address & 0x0000FFFFL));
@@ -132,6 +120,7 @@ public class RAM32Device implements BusDevice, RAM
 		this(new BusAddressRangeImpl(bankAddress, bankSize, 1));
 	}
 
+	
 	@Override
 	public String getName()
 	{
@@ -153,21 +142,21 @@ public class RAM32Device implements BusDevice, RAM
 			//System.out.print(BusAddressRange.makeHexAddress(address));
 		}
 		int effectiveAddress = address - this.bar.getLowAddress();
-		writeBank(effectiveAddress,(byte) (value & 0x0FF), IOSize.IO8Bit);
+		writeValue(effectiveAddress,(byte) (value & 0x0FF), IOSize.IO8Bit);
 	}
 
 	@Override
 	public int readAddressSigned(int address, IOSize size)
 	{
 		int effectiveAddress = address - this.bar.getLowAddress();
-		return readBank(effectiveAddress, size);
+		return readValue(effectiveAddress, size);
 	}
 
 	@Override
 	public int readAddressUnsigned(int address, IOSize size)
 	{
 		int effectiveAddress = address - this.bar.getLowAddress();
-		return readBank(effectiveAddress, size);
+		return readValue(effectiveAddress, size);
 	}
 
 	public void dumpContents(int max)
@@ -182,7 +171,7 @@ public class RAM32Device implements BusDevice, RAM
 			if (bytes == 0)
 				System.out.print(BusAddressRange.makeHexAddress(this.bar.getLowAddress() + i) + ": ");
 
-			System.out.print(BusAddressRange.makeHex(readBank(i,IOSize.IO8Bit)));
+			System.out.print(BusAddressRange.makeHex((byte)readValue(i,IOSize.IO8Bit)));
 			System.out.print(" ");
 			bytes++;
 			if (bytes > 7)
@@ -204,12 +193,12 @@ public class RAM32Device implements BusDevice, RAM
 		{
 			if ((i % bytesPerLine != 0) || (i == 0))
 			{
-				sb.append(ROMLoader.byteToHexString((byte)readBank(i - 1, IOSize.IO8Bit)) + " ");
+				sb.append(ROMLoader.byteToHexString((byte)readValue(i - 1, IOSize.IO8Bit)) + " ");
 			}
 			else
 			{
 				String zeroes = "0000";
-				sb.append(ROMLoader.byteToHexString((byte)readBank(i - 1, IOSize.IO8Bit)) + "\n");
+				sb.append(ROMLoader.byteToHexString((byte)readValue(i - 1, IOSize.IO8Bit)) + "\n");
 				if (addresses)
 					sb.append(zeroes.substring(0, Math.max(0, 4 - Integer.toHexString(i).length()))
 							+ Integer.toHexString(i) + ": ");
@@ -219,6 +208,36 @@ public class RAM32Device implements BusDevice, RAM
 		return sb.toString();
 	}
 
+	
+	public String toString(int bytesPerLine, int startAddress, int stopAddress, boolean addresses)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		if (addresses)
+			sb.append("0000: ");
+
+		for (int i = startAddress+1; i <= stopAddress+1; i++)
+		{
+			if ((i % bytesPerLine != 0) || (i == 0))
+			{
+				sb.append(ROMLoader.byteToHexString((byte)readValue(i - 1, IOSize.IO8Bit)) + " ");
+			}
+			else
+			{
+				String zeroes = "0000";
+				sb.append(ROMLoader.byteToHexString((byte)readValue(i - 1, IOSize.IO8Bit)) + "\n");
+				if (addresses)
+				{
+					if((i+1) < stopAddress)
+						sb.append(zeroes.substring(0, Math.max(0, 4 - Integer.toHexString(i).length()))
+								+ Integer.toHexString(i) + ": ");
+				}
+			}
+		}
+
+		return sb.toString();
+	}	
+	
 	public static void main(String[] args)
 	{
 		RAM32Device rd = new RAM32Device(0x00010000, 64 * 1024);
@@ -248,21 +267,21 @@ public class RAM32Device implements BusDevice, RAM
 		reset();
 		
 		for(int p=0;p<array.length;p++)
-			writeBank(base + p,array[p], IOSize.IO8Bit);
+			writeValue(base + p,array[p], IOSize.IO8Bit);
 		
 	}
 
 	@Override
 	public byte read(short address)
 	{
-		System.out.println(AddressMap.toHexAddress(address, IOSize.IO16Bit));
+		//System.out.println(AddressMap.toHexAddress(address, IOSize.IO16Bit));
 		return (byte)this.readAddressSigned((int)address, IOSize.IO8Bit);
 	}
 
 	@Override
 	public void write(short address, byte data)
 	{
-		this.writeBank((int)address, data, IOSize.IO8Bit);		
+		this.writeValue((int)address, data, IOSize.IO8Bit);		
 	}
 
 	@Override
@@ -271,11 +290,18 @@ public class RAM32Device implements BusDevice, RAM
 		return  this.toString(8, true);
 	}
 
+
+	@Override
+	public String getRAMString(int startAddress, int stopAddress)
+	{
+		return this.toString(8, startAddress, stopAddress, true);
+	}	
+	
 	@Override
 	public void reset()
 	{
 		for(int p=0;p<bar.getSize();p++)
-			writeBank(p, 0x00, IOSize.IO8Bit);	
+			writeValue(p, 0x00, IOSize.IO8Bit);	
 	}
 
 }

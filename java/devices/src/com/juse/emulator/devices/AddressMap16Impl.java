@@ -22,6 +22,7 @@ import com.juse.emulator.interfaces.BusWriter;
 import com.juse.emulator.interfaces.Detachable;
 import com.juse.emulator.interfaces.HasPorts;
 import com.juse.emulator.interfaces.IOSize;
+import com.juse.emulator.interfaces.RAMEx;
 import com.juse.emulator.interfaces.RaisesIRQ;
 
 public class AddressMap16Impl implements BusEx, AddressMap
@@ -428,27 +429,27 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		int high = (int)((address & 0xFFFF0000L) >> 16);
 		int low = (int)((address & 0x0000FFFFL));
 		
-		System.out.println("readBank linear address:" + Long.toHexString(address));
-		System.out.println("\thigh:" + high + " (" + Integer.toHexString(high) + ")");
-		System.out.println("\tlow :" + low  + " (" + Integer.toHexString(low) + ")");
+		//System.out.println("readBank linear address:" + Long.toHexString(address));
+		//System.out.println("\thigh:" + high + " (" + Integer.toHexString(high) + ")");
+		//System.out.println("\tlow :" + low  + " (" + Integer.toHexString(low) + ")");
 		
 		if(IOSize.IO8Bit == size)
 		{
 			value = (byte)(banks[high][low] & 0xFF);
-			System.out.println("readBankValue[IO8Bit] value:" + Long.toHexString(value & 0xFFL));
+			//System.out.println("readBankValue[IO8Bit] value:" + Long.toHexString(value & 0xFFL));
 		}
 		else if(IOSize.IO16Bit == size)
 		{
 			int b1 = (int)((banks[high][low] & 0xFF));
 			int b2 = (int)((banks[high][low+1] & 0xFF) << 8);
 			value = b1 | b2;
-			System.out.println("readBankValue[IO16Bit] value:" + Long.toHexString(value & 0xFFFFL));
+			//System.out.println("readBankValue[IO16Bit] value:" + Long.toHexString(value & 0xFFFFL));
 		}
 		else if(IOSize.IOBig16Bit == size)
 		{
 			value = (int)((banks[high][low+1] & 0xFF));
 			value |= (int)((banks[high][low] & 0xFF) << 8);
-			System.out.println("readBankValue[IOBig16Bit] value:" + Long.toHexString(value & 0xFFFFL));
+			//System.out.println("readBankValue[IOBig16Bit] value:" + Long.toHexString(value & 0xFFFFL));
 		}		
 		else if(IOSize.IO32Bit == size)
 		{
@@ -456,7 +457,7 @@ public class AddressMap16Impl implements BusEx, AddressMap
 			value |= (int)((banks[high][low+1] & 0xFF) << 8);
 			value |= (int)((banks[high][low+2] & 0xFF) << 16);
 			value |= (int)((banks[high][low+3] & 0xFF) << 24);   
-			System.out.println("readBankValue[IO32Bit] value:" + Long.toHexString(value & 0xFFFFFFFFL));
+			//System.out.println("readBankValue[IO32Bit] value:" + Long.toHexString(value & 0xFFFFFFFFL));
 		}
 		else if(IOSize.IOBig32Bit == size)
 		{
@@ -464,7 +465,7 @@ public class AddressMap16Impl implements BusEx, AddressMap
 			value |= (int)((banks[high][low+1] & 0xFF) << 16);
 			value |= (int)((banks[high][low+2] & 0xFF) << 8);
 			value |= (int)((banks[high][low+3] & 0xFF));
-			System.out.println("readBankValue[IOBig32Bit] value:" + Long.toHexString(value & 0xFFFFFFFFL));
+			//System.out.println("readBankValue[IOBig32Bit] value:" + Long.toHexString(value & 0xFFFFFFFFL));
 		}						
 
 		
@@ -535,6 +536,8 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		setAddress(addressMap, offset);
 
 
+		writeBank(addressMap,0xFF, 0xFF, IOSize.IO8Bit);
+		
 		writeBank(addressMap,0x00, 0xABCD, IOSize.IO16Bit);
 		readBankValue(addressMap,0x00, IOSize.IO16Bit);
 		
@@ -546,6 +549,38 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		
 		writeBank(addressMap,0x0C, 0x01020304, IOSize.IO32Bit);
 		readBankValue(addressMap,0x0C, IOSize.IO32Bit);
+		
+		
+		
+		RAMEx ram32 = new RAM32Device(0x00000000,16 * 1024 * 1024);
+		
+		ram32.writeValue(0xFF, 0xFF, IOSize.IO8Bit);
+		compareResult(ram32, 0x000000FF, IOSize.IO8Bit, 0xFF);
+		compareResult(ram32, 0x000000FF, IOSize.IO8Bit, ((int)ram32.read((short)0x000FF) & 0xFF));
+		
+		
+		compareResult(addressMap, ram32, 0x000000FF, IOSize.IO8Bit);
+		
+		ram32.writeValue(0x00, 0xABCD, IOSize.IO16Bit);
+		compareResult(ram32, 0x00000000, IOSize.IO16Bit, 0xABCD);
+		compareResult(addressMap, ram32, 0x00000000, IOSize.IO16Bit);
+			
+		
+		ram32.writeValue(0x02, 0xABCD, IOSize.IOBig16Bit);
+		compareResult(ram32, 0x00000002, IOSize.IOBig16Bit, 0xABCD);
+		compareResult(addressMap, ram32, 0x00000002, IOSize.IOBig16Bit);
+
+		ram32.writeValue(0x0C, 0x01020304, IOSize.IO32Bit);
+		compareResult(ram32, 0x0000000C, IOSize.IO32Bit, 0x01020304);
+		compareResult(addressMap, ram32, 0x0000000C, IOSize.IO32Bit);
+
+		ram32.writeValue(0x08, 0x01020304, IOSize.IOBig32Bit);
+		compareResult(ram32, 0x00000008, IOSize.IOBig32Bit, 0x01020304);
+		compareResult(addressMap, ram32, 0x00000008, IOSize.IOBig32Bit);
+		
+		
+		System.out.println(ram32.getRAMString(0x00000000, 0x000000FF));
+		
 		
 		int high = (int)((offset & 0xFFFF0000L) >> 16);
 		int low = (int)((offset & 0x0000FFFFL));
@@ -596,12 +631,15 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		
 		
 		System.out.println(AddressMap.toHexAddress(15, IOSize.IO8Bit));
-		System.out.println(AddressMap.toHexAddress(15, IOSize.IO16Bit));
-		System.out.println(AddressMap.toHexAddress(15, IOSize.IO32Bit));
 		
+		System.out.println(AddressMap.toHexAddress(15, IOSize.IO16Bit));
 		System.out.println(AddressMap.toHexAddress(0xABCD,  IOSize.IO16Bit));
 		
+		System.out.println(AddressMap.toHexAddress(15, IOSize.IO32Bit));
 		System.out.println(AddressMap.toHexAddress(0xABCDEF,IOSize.IOBig32Bit));
+		
+
+		
 		
 		AddressMap16Impl map =  new AddressMap16Impl(new RAMDevice(0x00000000,1024*1024),
 				                         new BusIRQ() 
@@ -669,6 +707,23 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		map.getMemoryMappedDevice(0x0000B000).writeAddress(0x0000B000, 0x1, IOSize.IO8Bit);
 		map.getMemoryMappedDevice(0x0000B001).writeAddress(0x0000B001, 'A', IOSize.IO8Bit);
 		
+	}
+
+	protected static void compareResult(RAMEx ram32, int address, IOSize size, int compareValue)
+	{
+		int value = ram32.readValue(address, size);
+		if(compareValue == value)
+			System.out.println(size.toString() + " VALUE PASSED");
+		else
+			System.out.println(size.toString() + " VALUE FAILED");
+	}	
+	
+	protected static void compareResult(byte[][] addressMap, RAMEx ram32, int address, IOSize size)
+	{
+		if(readBankValue(addressMap,address, size) == ram32.readValue(address, size))
+			System.out.println(size.toString() + " PASSED");
+		else
+			System.out.println(size.toString() + " FAILED");
 	}
 	
 }
