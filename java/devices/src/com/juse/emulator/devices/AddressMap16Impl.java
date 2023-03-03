@@ -321,13 +321,160 @@ public class AddressMap16Impl implements BusEx, AddressMap
 				b.busReset();
 	}
 
+	protected static byte[][] createBanks(long allocationSize)
+	{
+		byte[][] banks;
+		long bankCount = 0;
+		
+		System.out.println("createBanks:" + Long.toHexString(allocationSize));
+
+		int high = (int)((allocationSize & 0xFFFF0000L) >> 16);
+		System.out.println("createBanks high:" + high);
+		
+		if(allocationSize < 0xFFFFL)
+		{
+			bankCount = 1;
+		}
+		else
+		{
+		    int mod = (int) (allocationSize % 0xFFFFL);
+			
+			bankCount = (allocationSize/0xFFFFL);
+			if(mod > 0)
+				bankCount++;
+		}
+
+		System.out.println("banks:" + bankCount);
+		
+		banks = new byte[(int)high][0x0000FFFF + 1];
+		
+		System.out.println("\tbanks high:" + high + " (" + Integer.toHexString(high) + ")");
+		System.out.println("\tbanks low :" + 0x0000FFFF  + " (" + Integer.toHexString(0x0000FFFF) + ")");		
+		
+		
+		return banks;
+	}
+	
+	public static void printPaging(long offset)
+	{
+		int high = (int)((offset & 0xFFFF0000L) >> 16);
+		int low = (int)((offset & 0x0000FFFFL));
+		
+		System.out.println("linear address:" + Long.toHexString(offset));
+		System.out.println("\thigh:" + high + " (" + Integer.toHexString(high) + ")");
+		System.out.println("\tlow :" + low  + " (" + Integer.toHexString(low) + ")");
+	}
+
+	public static void setAddress(byte[][] map, long offset)
+	{
+		int high = (int)((offset & 0xFFFF0000L) >> 16);
+		int low = (int)((offset & 0x0000FFFFL));
+		
+		System.out.println("linear address:" + Long.toHexString(offset));
+		System.out.println("\thigh:" + high + " (" + Integer.toHexString(high) + ")");
+		System.out.println("\tlow :" + low  + " (" + Integer.toHexString(low) + ")");
+		
+		
+		map[high][low] = 1;		
+	}
+	
+	
 	@SuppressWarnings("unused")
 	public static void main(String[] args)
 	{
+		System.out.println("Max int:" + Integer.MAX_VALUE);
+		System.out.println("Max int:" + Long.toHexString(Integer.MAX_VALUE));
+		System.out.println("Max Long:" + Long.MAX_VALUE);
+		System.out.println("Max Long:" + Long.toHexString(Long.MAX_VALUE));
+		
+		
+		
+		long linearAddress = 0x0L;
+		printPaging(linearAddress);
+		
+		linearAddress = 0xFFFFL;
+		printPaging(linearAddress);
+		
+		linearAddress = 0x10000L;
+		printPaging(linearAddress);
+
+		linearAddress = 0x10001L;
+		printPaging(linearAddress);
+		
+		linearAddress = 0xFFFFFFL;
+		printPaging(linearAddress);
+		
+		linearAddress = 0x1000000L;
+		printPaging(linearAddress);
+		
+		
+		byte[][] addressMap; 
+		
+		//addressMap = createBanks(0xFFFFFFFFL);
+		//addressMap = null;
+		//System.gc();
+//		addressMap = createBanks(0xFFL);		
+//		addressMap = null;
+//		System.gc();
+//		addressMap = createBanks(0xFFFFL);
+//		addressMap = null;
+//		System.gc();
+//		addressMap = createBanks(0xFFFEL);
+//		addressMap = null;
+//		System.gc();
+		addressMap = createBanks(0xFFFFFFL);
+		addressMap = null;
+		System.gc();
+		addressMap = createBanks(16L * 1024L * 1024L);
+
+		long size = 16L * 1024L * 1024L;
+		
+		long offset = 0;
+		setAddress(addressMap, offset);
+
+		offset = 0xFFFFL;
+		setAddress(addressMap, offset);
+		
+		offset = 0x10000L;
+		setAddress(addressMap, offset);
+		
+		offset = 0xFFFFFFL;
+		setAddress(addressMap, offset);
+
+		
+		int high = (int)((offset & 0xFFFF0000L) >> 16);
+		int low = (int)((offset & 0x0000FFFFL));
+		
+		
+		/*
+		for(long i=0;i<=size;i++)
+		{
+			long offset = i - 1;
+			
+			int high = (int)((offset & 0xFFFF0000L) >> 16);
+			int low = (int)((offset & 0x0000FFFFL));
+			
+			System.out.println("high:" + high + " (" + Integer.toHexString(high) + ")");
+			System.out.println("low :" + low  + " (" + Integer.toHexString(low) + ")");
+			
+			addressMap[high - 1][low - 1] = (int)i;
+		}			
+		*/
+		
 		String addr1 = "FFFFFFFF";
 		int intVal = (int)Long.parseLong(addr1, 16);
 		System.out.println("intVal:" + intVal);
 		System.out.println("intVal:" + Integer.toHexString(intVal));
+
+		
+		for(long addr=0;addr<0xffffffff;addr++)
+		{
+			int currentInt = 0;
+			
+			
+			
+		}
+		
 		
 		intVal = 0xffffffff;
 		System.out.println("intVal:" + intVal);
