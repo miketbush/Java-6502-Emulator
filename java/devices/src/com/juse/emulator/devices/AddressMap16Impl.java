@@ -331,26 +331,10 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		int high = (int)((allocationSize & 0xFFFF0000L) >> 16);
 		System.out.println("createBanks high:" + high);
 		
-		if(allocationSize < 0xFFFFL)
-		{
-			bankCount = 1;
-		}
-		else
-		{
-		    int mod = (int) (allocationSize % 0xFFFFL);
-			
-			bankCount = (allocationSize/0xFFFFL);
-			if(mod > 0)
-				bankCount++;
-		}
-
-		System.out.println("banks:" + bankCount);
-		
 		banks = new byte[(int)high][0x0000FFFF + 1];
 		
 		System.out.println("\tbanks high:" + high + " (" + Integer.toHexString(high) + ")");
 		System.out.println("\tbanks low :" + 0x0000FFFF  + " (" + Integer.toHexString(0x0000FFFF) + ")");		
-		
 		
 		return banks;
 	}
@@ -378,6 +362,115 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		map[high][low] = 1;		
 	}
 	
+	
+	public static void writeBank(byte[][] map, int address, int value, IOSize size)
+	{
+		int high = (int)((address & 0xFFFF0000L) >> 16);
+		int low = (int)((address & 0x0000FFFFL));
+		
+		System.out.println("writeBank linear address:" + Long.toHexString(address));
+		System.out.println("writeBank value:" + Long.toHexString(value & 0xFFFFL));
+		System.out.println("\thigh:" + high + " (" + Integer.toHexString(high) + ")");
+		System.out.println("\tlow :" + low  + " (" + Integer.toHexString(low) + ")");
+		
+		
+		if(IOSize.IO8Bit == size)
+		{
+			map[high][low] = (byte)(value & 0xFF);
+		}
+		else if(IOSize.IO16Bit == size)
+		{
+			//byte highByte = (byte)((value & 0xFF00) >> 8);
+			//byte lowByte = (byte)((value & 0x00FF));
+			//System.out.println("\thighByte:" + highByte + " (" + Integer.toHexString(highByte & 0xFF) + ")");
+			//System.out.println("\tlowByte :" + lowByte  + " (" + Integer.toHexString(lowByte & 0xFF) + ")");
+			//map[high][low] = lowByte;
+			//map[high][low+1] = highByte;			
+			map[high][low] = (byte)((value & 0x00FF));
+			map[high][low+1] = (byte)((value & 0xFF00) >> 8);
+		}
+		else if(IOSize.IOBig16Bit == size)
+		{
+			map[high][low] = (byte)((value & 0xFF00) >> 8);
+			map[high][low+1] = (byte)((value & 0x00FF));
+		}		
+		else if(IOSize.IO32Bit == size)
+		{
+			map[high][low]   = (byte)((value & 0x000000FF));
+			map[high][low+1] = (byte)((value & 0x0000FF00) >> 8);
+			map[high][low+2] = (byte)((value & 0x00FF0000) >> 16);
+			map[high][low+3] = (byte)((value & 0xFF000000) >> 24);
+		}
+		else if(IOSize.IOBig32Bit == size)
+		{
+
+//			byte b1  = (byte)((value & 0xFF000000) >> 24);
+//			System.out.println("\thighByte:" + b1 + " (" + Integer.toHexString(b1 & 0xFF) + ")");
+//			byte b2  = (byte)((value & 0x00FF0000) >> 16);
+//			System.out.println("\thighByte:" + b2 + " (" + Integer.toHexString(b2 & 0xFF) + ")");
+//			byte b3  = (byte)((value & 0x0000FF00) >> 8);
+//			System.out.println("\thighByte:" + b3 + " (" + Integer.toHexString(b3 & 0xFF) + ")");
+//			byte b4  = (byte)((value & 0x000000FF));			
+//			System.out.println("\thighByte:" + b4 + " (" + Integer.toHexString(b4 & 0xFF) + ")");
+			
+			
+			map[high][low]   = (byte)((value & 0xFF000000) >> 24);
+			map[high][low+1] = (byte)((value & 0x00FF0000) >> 16);
+			map[high][low+2] = (byte)((value & 0x0000FF00) >> 8);
+			map[high][low+3] = (byte)((value & 0x000000FF));
+		}						
+	}	
+	
+	protected static int readBankValue(byte[][] banks, int address, IOSize size)
+	{
+		int value = 0;
+		
+		int high = (int)((address & 0xFFFF0000L) >> 16);
+		int low = (int)((address & 0x0000FFFFL));
+		
+		System.out.println("readBank linear address:" + Long.toHexString(address));
+		System.out.println("\thigh:" + high + " (" + Integer.toHexString(high) + ")");
+		System.out.println("\tlow :" + low  + " (" + Integer.toHexString(low) + ")");
+		
+		if(IOSize.IO8Bit == size)
+		{
+			value = (byte)(banks[high][low] & 0xFF);
+			System.out.println("readBankValue[IO8Bit] value:" + Long.toHexString(value & 0xFFL));
+		}
+		else if(IOSize.IO16Bit == size)
+		{
+			int b1 = (int)((banks[high][low] & 0xFF));
+			int b2 = (int)((banks[high][low+1] & 0xFF) << 8);
+			value = b1 | b2;
+			System.out.println("readBankValue[IO16Bit] value:" + Long.toHexString(value & 0xFFFFL));
+		}
+		else if(IOSize.IOBig16Bit == size)
+		{
+			value = (int)((banks[high][low+1] & 0xFF));
+			value |= (int)((banks[high][low] & 0xFF) << 8);
+			System.out.println("readBankValue[IOBig16Bit] value:" + Long.toHexString(value & 0xFFFFL));
+		}		
+		else if(IOSize.IO32Bit == size)
+		{
+			value =  (int)((banks[high][low]   & 0xFF));
+			value |= (int)((banks[high][low+1] & 0xFF) << 8);
+			value |= (int)((banks[high][low+2] & 0xFF) << 16);
+			value |= (int)((banks[high][low+3] & 0xFF) << 24);   
+			System.out.println("readBankValue[IO32Bit] value:" + Long.toHexString(value & 0xFFFFFFFFL));
+		}
+		else if(IOSize.IOBig32Bit == size)
+		{
+			value  = (int)((banks[high][low]   & 0xFF) << 24);
+			value |= (int)((banks[high][low+1] & 0xFF) << 16);
+			value |= (int)((banks[high][low+2] & 0xFF) << 8);
+			value |= (int)((banks[high][low+3] & 0xFF));
+			System.out.println("readBankValue[IOBig32Bit] value:" + Long.toHexString(value & 0xFFFFFFFFL));
+		}						
+
+		
+		
+		return value;		
+	}	
 	
 	@SuppressWarnings("unused")
 	public static void main(String[] args)
@@ -441,6 +534,18 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		offset = 0xFFFFFFL;
 		setAddress(addressMap, offset);
 
+
+		writeBank(addressMap,0x00, 0xABCD, IOSize.IO16Bit);
+		readBankValue(addressMap,0x00, IOSize.IO16Bit);
+		
+		writeBank(addressMap,0x02, 0xABCD, IOSize.IOBig16Bit);
+		readBankValue(addressMap,0x02, IOSize.IOBig16Bit);
+		
+		writeBank(addressMap,0x08, 0x01020304, IOSize.IOBig32Bit);
+		readBankValue(addressMap,0x08, IOSize.IOBig32Bit);
+		
+		writeBank(addressMap,0x0C, 0x01020304, IOSize.IO32Bit);
+		readBankValue(addressMap,0x0C, IOSize.IO32Bit);
 		
 		int high = (int)((offset & 0xFFFF0000L) >> 16);
 		int low = (int)((offset & 0x0000FFFFL));
