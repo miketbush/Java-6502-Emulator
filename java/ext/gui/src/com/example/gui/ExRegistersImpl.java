@@ -525,26 +525,28 @@ public class ExRegistersImpl extends JPanel implements EmulatorDisplay, ActionLi
 			if (this.writeEvent)
 			{
 				// System.out.println("UPDATE PAGE:" + ramPage);
-				ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
+				//ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
 				writeEvent = false;
+				this.repaint();
 			}
-			this.repaint();
+			
 		}
 	}
 
 	@Override
 	public void readListener(short address)
 	{
+		writeEvent = true;
 	}
 
 	@Override
 	public void writeListener(short address, byte data)
 	{
-		int updatePage = ((0x0000FFFF & (address - 1)) / 0xFF);
+		//int updatePage = ((0x0000FFFF & (address - 1)) / 0xFF);
 		// System.out.println("PAGE[" + Integer.toHexString(0x0000FFFF & address) + "]:"
 		// + updatePage);
-		if (ramPage == updatePage)
-			this.writeEvent = true;
+		//if (ramPage == updatePage)
+		this.writeEvent = true;
 	}
 
 	@Override

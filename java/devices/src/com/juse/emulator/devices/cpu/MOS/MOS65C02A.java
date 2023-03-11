@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Vector;
 import com.juse.emulator.util.loaders.ROMLoader;
 import com.juse.emulator.interfaces.Instruction;
 import com.juse.emulator.interfaces.Telemetry;
+import com.juse.emulator.interfaces.TelemetryInfo;
 import com.juse.emulator.debug.DebugControl;
 import com.juse.emulator.debug.DebugListener;
 import com.juse.emulator.debug.DebugListener.DebugReason;
@@ -30,6 +32,8 @@ import com.juse.emulator.util.collections.LimitedSizeQueue;
 
 public class MOS65C02A implements CPU, CPUInfo, ClockLine, DeviceDebugger, DebugControl
 {
+	private TelemetryInfo telemetry = new TelemetryInfo();
+	
 	private static class InterruptLock
 	{
 		public InterruptLock()
@@ -79,7 +83,7 @@ public class MOS65C02A implements CPU, CPUInfo, ClockLine, DeviceDebugger, Debug
 	public Map<Integer,Integer> cyclesCache = new HashMap<Integer,Integer>();
 	public Map<Integer,Method> addressModeCache = new HashMap<Integer,Method>();
 	public Map<Integer,Method> instructionCache = new HashMap<Integer,Method>();
-	private Telemetry telemetry = new Telemetry();
+	//private Telemetry telemetry = new Telemetry();
 	
 	private Bus cpuBus = null;//new BusImpl();
 	private int clocks;
@@ -332,6 +336,11 @@ public class MOS65C02A implements CPU, CPUInfo, ClockLine, DeviceDebugger, Debug
 		lookup[0x9A] = new Instruction("TXS", "IMP", 2);
 
 		lookup[0x98] = new Instruction("TYA", "IMP", 2);
+		
+		telemetry.registerInfo = new LinkedHashMap<String,Integer>();
+		telemetry.flagInfo = new LinkedHashMap<String,Integer>();
+		telemetry.pointerInfo = new LinkedHashMap<String,Integer>();
+		telemetry.addressInfo = new LinkedHashMap<String,Integer>();		
 	}
 
 	
@@ -1565,6 +1574,50 @@ public class MOS65C02A implements CPU, CPUInfo, ClockLine, DeviceDebugger, Debug
 	@Override
 	public Telemetry getTelemetry()
 	{
+		telemetry.a = a;
+		telemetry.x = x;
+		telemetry.y = y;
+		telemetry.addressAbsolute = addressAbsolute;
+		telemetry.addressRelative = addressRelative;
+		telemetry.stackPointer = stackPointer;
+		telemetry.programCounter = programCounter;
+		telemetry.opcode = opcode;
+		telemetry.opcodeName = lookup[Byte.toUnsignedInt(opcode)].opcode;
+		telemetry.clocksPerSecond = ClocksPerSecond;
+		telemetry.cycles = cycles;
+		telemetry.clocks = clocks;
+		telemetry.flags  = flags;	
+		telemetry.irqs = irqCount;
+		telemetry.history = history;		
+		
+		telemetry.registerInfo.put(" A",(a & 0x00FF));
+		telemetry.registerInfo.put(" X",(x & 0x00FF));
+		telemetry.registerInfo.put(" Y",(y & 0x00FF));
+		
+		
+		telemetry.flagInfo.put("NVUBDIZC",(int)flags & 0x00FF);
+		
+		telemetry.a = (byte) (a & 0x00FF) ;
+		telemetry.flags = (byte) (flags & 0x00FF) ;
+		telemetry.x = (byte) (x & 0x00FF);
+		telemetry.y = (byte) (y & 0x00FF);
+		
+		telemetry.opcode = (byte)(opcode & 0xff);
+		telemetry.opcodeName = "";
+		
+		telemetry.addressAbsolute = addressAbsolute;
+		telemetry.addressRelative = addressRelative;
+		telemetry.stackPointer = stackPointer;
+		telemetry.programCounter = programCounter;
+		telemetry.opcode = opcode;
+		telemetry.opcodeName = lookup[Byte.toUnsignedInt(opcode)].opcode;
+		telemetry.clocksPerSecond = ClocksPerSecond;
+		telemetry.cycles = cycles;
+		telemetry.clocks = clocks;
+		telemetry.flags  = flags;	
+		telemetry.irqs = irqCount;
+		telemetry.history = history;		
+		
 		return telemetry;
 	}
 
