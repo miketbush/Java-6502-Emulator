@@ -161,7 +161,7 @@ public class ExRAMGridImpl extends JPanel implements EmulatorDisplay, ActionList
 			System.out.println(fonts[i]);
 		}
 		*/
-		t = new javax.swing.Timer(16, this);
+		//t = new javax.swing.Timer(16, this);
 		//t.start();
 		setBackground(Color.BLUE);
 		setPreferredSize(new Dimension(1200, 900));

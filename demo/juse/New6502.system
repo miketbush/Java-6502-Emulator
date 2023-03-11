@@ -6,18 +6,11 @@
 # Extend functionality via class path entries 
 #
 ####################################################
-name=6502-32
-
-####################################################
-#            Extension Class Path
-####################################################
-#ext=./ext
-
+name=6502
 ####################################################
 #            User Interface Handler Class
 ####################################################
-#ui=com.mygui.EmulatorFrameImpl
-
+ui=com.example.gui.DemoUITest4
 ####################################################
 #            Address Map Handler Class
 ####################################################
@@ -28,8 +21,6 @@ addressbus=com.juse.emulator.devices.AddressMap16Impl
 #             CPU Definition Class
 ####################################################
 
-#cpu=com.juse.emulator.ext.cpu.Zilog.Z80A
-#cpu=com.juse.emulator.devices.cpu.Zilog.Z80
 cpu=com.juse.emulator.devices.cpu.MOS.MOS65C02A
 
 ####################################################
@@ -67,7 +58,8 @@ irqbus=com.juse.emulator.devices.BusIRQImpl
 ####################################################
 
 bus=RAM,0x00000000,65535
-bus=ROM,0x00000000,file://./demo/main.bin
+#bus=ROM,0x00000000,file://./demo/main.bin
+bus=ROM,0x00000000,file://./demo/projectB/main.bin
 bus=DISPLAY,0x000A000,80,25
 
 ####################################################

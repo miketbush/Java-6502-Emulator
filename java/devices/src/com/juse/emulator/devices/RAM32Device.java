@@ -160,6 +160,11 @@ public class RAM32Device implements BusDevice, RAMEx
 	@Override
 	public int readAddressSigned(int address, IOSize size)
 	{
+		if(address < 0)
+		{
+			address = 0xFFFF + address + 1;
+			//System.out.print(BusAddressRange.makeHexAddress(address));
+		}		
 		int effectiveAddress = address - this.bar.getLowAddress();
 		return readValue(effectiveAddress, size);
 	}
@@ -167,6 +172,11 @@ public class RAM32Device implements BusDevice, RAMEx
 	@Override
 	public int readAddressUnsigned(int address, IOSize size)
 	{
+		if(address < 0)
+		{
+			address = 0xFFFF + address + 1;
+			//System.out.print(BusAddressRange.makeHexAddress(address));
+		}		
 		int effectiveAddress = address - this.bar.getLowAddress();
 		return readValue(effectiveAddress, size);
 	}

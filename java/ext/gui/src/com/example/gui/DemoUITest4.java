@@ -375,6 +375,11 @@ public class DemoUITest4 extends JFrame implements EmulatorFrame, BusListener, E
 			pp.setPreferredSize(new Dimension(100,100));
 		}
 			
+		if(pp instanceof BusListener)
+		{
+			((AddressMap)(this.emulator).getBus()).addBusListener((BusListener)pp);			
+		}
+		
 		p.add(pp,BorderLayout.CENTER);
 		
 		//DockingManager.registerDockable(p, desc, true);

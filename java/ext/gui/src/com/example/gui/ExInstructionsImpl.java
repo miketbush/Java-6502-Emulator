@@ -155,7 +155,7 @@ public class ExInstructionsImpl extends JPanel implements EmulatorDisplay, Actio
 
 		// romPageString = SystemEmulator.rom.getROMString().substring(romPage * 960,
 		// (romPage + 1) * 960);
-		ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
+		//ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
 
 		this.setFocusable(true);
 		this.requestFocus();
@@ -166,8 +166,8 @@ public class ExInstructionsImpl extends JPanel implements EmulatorDisplay, Actio
 	
 	public void refreshBus()
 	{
-		ramPage = 0;
-		ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
+		//ramPage = 0;
+		//ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
 		this.repaint();
 	}	
 
@@ -331,24 +331,28 @@ public class ExInstructionsImpl extends JPanel implements EmulatorDisplay, Actio
 				// System.out.println("UPDATE PAGE:" + ramPage);
 				ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
 				writeEvent = false;
+				this.repaint();
 			}
-			this.repaint();
+			
 		}
 	}
 
 	@Override
 	public void readListener(short address)
 	{
+		//redraw();
+		this.writeEvent = true;
 	}
 
 	@Override
 	public void writeListener(short address, byte data)
 	{
-		int updatePage = ((0x0000FFFF & (address - 1)) / 0xFF);
+		//int updatePage = ((0x0000FFFF & (address - 1)) / 0xFF);
 		// System.out.println("PAGE[" + Integer.toHexString(0x0000FFFF & address) + "]:"
 		// + updatePage);
-		if (ramPage == updatePage)
-			this.writeEvent = true;
+		//if (ramPage == updatePage)
+		this.writeEvent = true;
+		//redraw();
 	}
 
 	@Override

@@ -361,8 +361,8 @@ public class ExRAMImpl extends JPanel implements EmulatorDisplay, ActionListener
 				// System.out.println("UPDATE PAGE:" + ramPage);
 				ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
 				writeEvent = false;
+				this.repaint();
 			}
-			this.repaint();
 		}
 	}
 
@@ -379,10 +379,10 @@ public class ExRAMImpl extends JPanel implements EmulatorDisplay, ActionListener
 		// + updatePage);
 		
 		
-		ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
+		//ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
 		if (ramPage == updatePage)
 			this.writeEvent = true;
-		redraw();			
+		//redraw();			
 	}
 
 	@Override
@@ -574,6 +574,7 @@ public class ExRAMImpl extends JPanel implements EmulatorDisplay, ActionListener
 				// ramPageString = SystemEmulator.ram.getRAMString().substring(ramPage * 960,
 				// (ramPage + 1) * 960);
 				ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
+				this.writeEvent = true;
 			}
 			break;
 		case 'h':
@@ -583,6 +584,7 @@ public class ExRAMImpl extends JPanel implements EmulatorDisplay, ActionListener
 				// ramPageString = SystemEmulator.ram.getRAMString().substring(ramPage * 960,
 				// (ramPage + 1) * 960);
 				ramPageString = emulator.getBus().dumpBytesAsString().substring(ramPage * 960, (ramPage + 1) * 960);
+				this.writeEvent = true;
 			}
 			break;
 

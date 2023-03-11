@@ -33,7 +33,11 @@ public class AddressMap16Impl implements BusEx, AddressMap
 	private BusDevice defaultSpace = null;
 	private BusIRQ birq = null;
 
-	private List<BusListener> busListeners = new Vector<BusListener>();
+	//private List<BusListener> busListeners = new Vector<BusListener>();
+	
+	private List<BusListener>   busOrgListeners = new Vector<BusListener>();
+	private List<BusExListener> busExListeners  = new Vector<BusExListener>();
+	
 
 	static protected int asAddress(int addressUknown)
 	{
@@ -53,7 +57,10 @@ public class AddressMap16Impl implements BusEx, AddressMap
 
 	public void addBusListener(BusListener bl)
 	{
-		this.busListeners.add(bl);
+		if(bl instanceof BusExListener)
+			this.busExListeners.add((BusExListener)bl);
+		else
+			this.busOrgListeners.add(bl);
 	}
 	
 	public void setIRQHandler(BusIRQ busIRQ)
@@ -149,16 +156,21 @@ public class AddressMap16Impl implements BusEx, AddressMap
 
 		int v = getMemoryMappedDevice(laddr).readAddressUnsigned(laddr, size);
 		
-		if(busListeners!=null && busListeners.size() > 0)
+		if(busOrgListeners!=null && busOrgListeners.size() > 0)
 		{
-			for(BusListener b : busListeners)
+			for(BusListener b : busOrgListeners)
 			{
-				if(b instanceof BusExListener)
-					((BusExListener)b).readListener(address,size);
-				else
-					b.readListener((short)address);
+				b.readListener((short)address);
 			}
 		}
+		if(busExListeners!=null && busExListeners.size() > 0)
+		{
+			for(BusExListener b : busExListeners)
+			{
+				b.readListener(address,size);
+			}
+		}
+		
 		return v;
 	}
 
@@ -170,6 +182,7 @@ public class AddressMap16Impl implements BusEx, AddressMap
 		BusDevice bd = getMemoryMappedDevice(laddr);
 		bd.writeAddress(laddr, data,size);		
 
+		/*
 		if(busListeners!=null && busListeners.size() > 0)
 			for(BusListener b : busListeners)
 			{
@@ -178,6 +191,22 @@ public class AddressMap16Impl implements BusEx, AddressMap
 				else
 					b.writeListener((short)address, (byte)data);
 			}
+		*/
+		
+		if(busOrgListeners!=null && busOrgListeners.size() > 0)
+		{
+			for(BusListener b : busOrgListeners)
+			{
+				b.writeListener((short)address, (byte)data);
+			}
+		}
+		if(busExListeners!=null && busExListeners.size() > 0)
+		{
+			for(BusExListener b : busExListeners)
+			{
+				b.writeListener(address, data, size);
+			}
+		}		
 	}	
 	
 	public void printAddressMap()
@@ -304,9 +333,13 @@ public class AddressMap16Impl implements BusEx, AddressMap
 	@Override
 	public void reset()
 	{
-		if(busListeners!=null && busListeners.size() > 0)
-			for(BusListener b : busListeners)
+		if(busOrgListeners!=null && busOrgListeners.size() > 0)
+			for(BusListener b : busOrgListeners)
 				b.busReset();
+
+		if(busExListeners!=null && busExListeners.size() > 0)
+			for(BusListener b : busExListeners)
+				b.busReset();	
 	}
 
 	protected static byte[][] createBanks(long allocationSize)
