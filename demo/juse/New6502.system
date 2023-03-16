@@ -10,7 +10,7 @@ name=6502
 ####################################################
 #            User Interface Handler Class
 ####################################################
-ui=com.example.gui.DemoUITest4
+ui=com.example.gui.ExGUIFrameImpl
 ####################################################
 #            Address Map Handler Class
 ####################################################

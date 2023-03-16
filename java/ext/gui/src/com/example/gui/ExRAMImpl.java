@@ -141,14 +141,7 @@ public class ExRAMImpl extends JPanel implements EmulatorDisplay, ActionListener
 		}
 		this.title = ((Emulator) emulator).getMainTitle() + " Emulator v" + emulator.getSystemVersion();
 
-		/*
-		GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-	    String[] fonts = env.getAvailableFontFamilyNames();
-		for(int i=0;i<fonts.length;i++)
-		{
-			System.out.println(fonts[i]);
-		}
-		*/
+
 		t = new javax.swing.Timer(16, this);
 		t.start();
 		setBackground(Color.blue);
