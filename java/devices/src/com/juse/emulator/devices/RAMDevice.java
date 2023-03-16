@@ -24,6 +24,16 @@ public class RAMDevice implements BusDevice, RAM
 		this(new BusAddressRangeImpl(bankAddress, bankSize, 1));
 	}
 
+	public RAMDevice(String bankAddress, int bankSize)
+	{
+		this(new BusAddressRangeImpl(Integer.parseInt(bankAddress,16), bankSize, 1));
+	}	
+
+	public RAMDevice(String bankAddress, String bankSize)
+	{
+		this(new BusAddressRangeImpl(Integer.parseInt(bankAddress,16), Integer.parseInt(bankSize,16), 1));
+	}		
+	
 	@Override
 	public String getName()
 	{

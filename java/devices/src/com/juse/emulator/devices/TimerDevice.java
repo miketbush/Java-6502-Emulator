@@ -43,6 +43,10 @@ public class TimerDevice implements BusDevice, RaisesIRQ
 		this(new BusAddressRangeImpl(bankAddress,2,1),period);
 	}
 
+	public TimerDevice(String bankAddress, int period)
+	{
+		this(new BusAddressRangeImpl(Integer.parseInt(bankAddress.replace("0x",""),16),2,1),period);
+	}	
 	
 	@Override
 	public String getName()
