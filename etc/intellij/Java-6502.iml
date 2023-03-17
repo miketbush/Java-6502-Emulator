@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="EclipseModuleManager">
+    <libelement value="jar://$MODULE_DIR$/java/lib/HaddenUtil.jar!/" />
+    <src_description expected_position="0">
+      <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
+      <src_folder value="file://$MODULE_DIR$/java/devices/src" expected_position="1" />
+      <src_folder value="file://$MODULE_DIR$/java/emulator/src" expected_position="2" />
+      <src_folder value="file://$MODULE_DIR$/java/interfaces/src" expected_position="3" />
+      <src_folder value="file://$MODULE_DIR$/java/utility/src" expected_position="4" />
+      <src_folder value="file://$MODULE_DIR$/java/ext/motorola-m68000/src" expected_position="5" />
+      <src_folder value="file://$MODULE_DIR$/java/ext/gui/src" expected_position="6" />
+      <src_folder value="file://$MODULE_DIR$/java/ext/zilog-z80acpu/src" expected_position="7" />
+    </src_description>
+  </component>
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/bin" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/java/devices/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/java/emulator/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/java/ext/gui/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/java/ext/motorola-m68000/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/java/ext/zilog-z80acpu/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/java/interfaces/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/java/utility/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="HaddenUtil.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/java/lib/HaddenUtil.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+  </component>
+</module>

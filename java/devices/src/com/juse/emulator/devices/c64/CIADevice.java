@@ -99,6 +99,12 @@ public class CIADevice implements BusDevice, RaisesIRQ, HasPorts
 		this(new BusAddressRangeImpl(bankAddress, CONST_LAST, 1));
 	}
 
+	public CIADevice(String bankAddress)
+	{
+		this(new BusAddressRangeImpl(Integer.parseInt(bankAddress.replace("0x",""),16), CONST_LAST, 1));
+	}
+	
+	
 	@Override
 	public String getName()
 	{

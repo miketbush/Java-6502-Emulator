@@ -14,12 +14,25 @@ public class Convert
 	
 	public static String padStringWithZeroes(String s, int padLength)
 	{
-		char[] pads = new char[padLength - s.length()];
-		for (int i = 0; i < pads.length; i++)
+		try
 		{
-			pads[i] = '0';
+			if(s.length() > padLength)
+				padLength = s.length();
+			
+			char[] pads = new char[padLength - s.length()];
+			for (int i = 0; i < pads.length; i++)
+			{
+				pads[i] = '0';
+			}
+			return String.valueOf(pads) + s;
 		}
-		return String.valueOf(pads) + s;
+		catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return "";
 	}
 	
 	public static String getAddressAbsoluteAsString(Instruction dbgOp, short addressAbsolute)

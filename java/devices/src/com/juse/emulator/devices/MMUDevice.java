@@ -1,6 +1,5 @@
 package com.juse.emulator.devices;
 
-import com.juse.emulator.util.loaders.ROMLoader;
 import com.juse.emulator.interfaces.BusAddressRange;
 import com.juse.emulator.interfaces.BusDevice;
 import com.juse.emulator.interfaces.IOSize;
